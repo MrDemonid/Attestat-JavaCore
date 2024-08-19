@@ -7,37 +7,50 @@ import java.util.Arrays;
 
 public class Main {
 
+
     public static void main(String[] args)
     {
-//        /*
-//            Проверяем задание №1 - Написать функцию, создающую резервную копию всех
-//            файлов в директории (без поддиректорий) во вновь созданную папку ./backup
-//         */
-//        try {
-//            BackupDir.backupDir("./assets/src_dir", "./assets/backup/");
-//        } catch (IOException e) {
-//            System.out.println("Fatal error: " + e.getMessage());
-//            // или так:
-//            // throw new RuntimeException(e);
-//        }
+        Main work = new Main();
 
-        int[] stat = {2, 1, 0, 2, 0, 1, 1, 0, 2, 1, 1, 0, 0, 3, 2, 3, 1};
+        /*
+            Задача 1. Делаем бэкап директории без подкаталогов
+         */
+        work.work1("./assets/src_dir", "./assets/backup/");
 
-//        BitPack pack = new BitPack(8, 2);
-//        int[] res = pack.pack(stat);
-//        System.out.println(Arrays.toString(res));
-//
-//        int[] unp = pack.unpack(res, stat.length);
-//        System.out.println("source array: \n" + Arrays.toString(stat));
-//        System.out.println(Arrays.toString(unp));
 
-        BitManager manager = new BitManager("./assets/test.bit", new BitPack(16, 2));
+        /*
+            Задачи 2 и 3. Записываем массив в файл и считываем его.
+         */
+        int[] stat = {2, 1, 0, 2, 0, 1, 1, 0, 2};
 
-        manager.save(stat);
-        System.out.println("source array: " + Arrays.toString(stat));
+        work.work2("./assets/test.bit", stat);
+        int[] res = work.work3("./assets/test.bit");
 
-        int[] res = manager.load();
-        System.out.println("source array: " + Arrays.toString(res));
-
+        System.out.println("Array equals is '" + Arrays.equals(stat, res) + "'");
     }
+
+
+    private void work1(String source, String destination)
+    {
+        try {
+            BackupDir.backupDir(source, destination);
+        } catch (IOException e) {
+            System.out.println("Fatal error: " + e.getMessage());
+            // или так:
+            // throw new RuntimeException(e);
+        }
+    }
+
+    private void work2(String fname, int[] array) throws RuntimeException
+    {
+        BitManager manager = new BitManager(fname, new BitPack(2));
+        manager.save(array);
+    }
+
+    private int[] work3(String fname) throws RuntimeException
+    {
+        BitManager manager = new BitManager(fname, new BitPack(2));
+        return manager.load();
+    }
+
 }

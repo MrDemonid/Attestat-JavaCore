@@ -24,12 +24,18 @@ public class BitManager {
         try (OutputStream out = new BufferedOutputStream(new FileOutputStream(fileName)))
         {
             int[] res = packer.pack(source);
+            int bytesPerCell = (packer.getBitsPerCell()+7) / 8; // кол-во байт в одном эл-те массива source
             // пишем сигнатуру и длину исходного массива
             out.write(0xDC);
             out.write(source.length);
+            // пишем данные
             for (int n : res)
             {
-                out.write(n);
+                for (int i = 0; i < bytesPerCell; i++)
+                {
+                    out.write(n & 0xFF);
+                    n >>>=8;
+                }
             }
         } catch (Exception e)
         {
@@ -43,21 +49,33 @@ public class BitManager {
      */
     public int[] load() throws RuntimeException
     {
-        try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(fileName)))
+        {
+            int bytesPerCell = (packer.getBitsPerCell()+7) / 8; // кол-во байт в одном эл-те массива source
             if (in.read() != 0xDC)
                 throw new RuntimeException("Неверный формат файла!");
             int len = in.read();
-            System.out.println("load: len = " + len);
-            int[] res = new int[len];
-            int index = 0;
-            while (index < res.length)
+            int[] res = new int[len / bytesPerCell + 2];
+            // считываем данные
+            int index = -1;
+            int rd = -1;
+            do
             {
-                res[index++] = in.read();
-            }
+                res[++index] = 0;
+                for (int i = 0; i < bytesPerCell; i++)
+                {
+                    rd = in.read();
+                    if (rd == -1)
+                        break;
+                    res[index] |= (rd << i*8);
+                }
+            } while (rd != -1);
 
             return packer.unpack(res, len);
-        }catch (IndexOutOfBoundsException e) {
-            throw new RuntimeException("Неверный формат файла");
+
+        } catch (IndexOutOfBoundsException e) {
+            // считанный байт длины и реальная длина данных в файле не совпадают, выходим
+            throw new RuntimeException("Неверный формат файла!");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

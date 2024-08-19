@@ -18,7 +18,12 @@ public class BitPack {
     {
         setBitsPerCell(bitsPerCell);
         setBitsPerElem(bitPerDigit);
-        bitMask = (1 << bitPerDigit) - 1;
+        bitMask = (1 << this.bitsPerElem) - 1;
+    }
+
+    public BitPack(int bitsPerElem)
+    {
+        this(24, bitsPerElem);
     }
 
     public void setBitsPerCell(int bitsPerCell)
@@ -33,8 +38,18 @@ public class BitPack {
     {
         if (bitsPerElem > 1 && bitsPerElem <= 8)
             this.bitsPerElem = bitsPerElem;
-        else
-            this.bitsPerElem = 2;
+        else {
+            this.bitsPerElem = 8;
+            System.out.println("Bits per element is too long! Use default (8).");
+        }
+    }
+
+    /**
+     * Возвращает кол-во задействованных бит в одной ячейке (int)
+     */
+    public int getBitsPerCell()
+    {
+        return bitsPerCell;
     }
 
     /**
